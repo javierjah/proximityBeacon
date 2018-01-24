@@ -7,8 +7,25 @@ import {
   Text,
   View
 } from 'react-native';
-
+import {DeviceEventEmitter} from 'react-native';
+import Beacons from 'react-native-beacons-manager';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import moment from 'moment';
+
+// Define a region which can be identifier + uuid,
+// identifier + uuid + major or identifier + uuid + major + minor
+// (minor and major properties are numbers)
+
+// const region = {
+//   identifier: '76ae1bda4f863d5db907f01ed9b3892e',
+//   uuid: 'B9407F30-F5F8-466E-AFF9-25556B57FE6D'
+// };
+
+const region = {
+  identifier: '14563c2efc7e1e395e3b3da41df2a32b',
+  uuid: '3600D271-0466-4E79-A66A-2F9DC063AC18'
+};
+const TIME_FORMAT = 'MM/DD/YYYY HH:mm:ss';
 
 class CounterView extends Component {
   static displayName = 'CounterView';
@@ -32,6 +49,81 @@ class CounterView extends Component {
     }).isRequired,
     navigate: PropTypes.func.isRequired
   };
+
+  componentWillMount = () => {
+    // MANDATORY: you have to request ALWAYS Authorization (not only when in use) when monitoring
+    // you also have to add "Privacy - Location Always Usage Description" in your "Info.plist" file
+    // otherwise monitoring won't work
+    Beacons.requestAlwaysAuthorization();
+    Beacons.shouldDropEmptyRanges(true);
+
+    // Monitor for beacons inside the region
+    Beacons
+      .startMonitoringForRegion(region) // or like  < v1.0.7: .startRangingBeaconsInRegion(identifier, uuid)
+      .then(() => console.log('Beacons monitoring started succesfully'))
+      .catch(error => console.log(`Beacons monitoring not started, error: ${error}`));
+    // Range for beacons inside the region
+    Beacons
+      .startRangingBeaconsInRegion(region) // or like  < v1.0.7: .startRangingBeaconsInRegion(identifier, uuid)
+      .then(() => console.log('Beacons ranging started succesfully'))
+      .catch(error => console.log(`Beacons ranging not started, error: ${error}`));
+    // update location to ba able to monitor:
+    Beacons.startUpdatingLocation();
+  }
+
+  componentDidMount = () => {
+    // Listen for beacon changes
+    // Ranging event
+    this.beaconsDidRangeEvent = DeviceEventEmitter.addListener(
+      'beaconsDidRange',
+      (data) => {
+        console.log('beaconsDidRange data: ', data);
+        // this.setState({rangingDataSource: this.state.rangingDataSource.cloneWithRows(data.beacons)});
+      }
+    );
+
+    // monitoring events
+    this.regionDidEnterEvent = DeviceEventEmitter.addListener(
+      'regionDidEnter',
+      (data) => {
+        console.log('monitoring - regionDidEnter data: ', data);
+        const time = moment().format(TIME_FORMAT);
+        // this.setState({regionEnterDatasource: this.state.rangingDataSource.cloneWithRows([{identifier: data.identifier, uuid: data.uuid, minor: data.minor, major: data.major, time}])});
+      }
+    );
+
+    this.regionDidExitEvent = DeviceEventEmitter.addListener(
+      'regionDidExit',
+      ({identifier, uuid, minor, major}) => {
+        console.log('monitoring - regionDidExit data: ', {identifier, uuid, minor, major});
+        const time = moment().format(TIME_FORMAT);
+        // this.setState({regionExitDatasource: this.state.rangingDataSource.cloneWithRows([{identifier, uuid, minor, major, time}])});
+      }
+    );
+  }
+
+
+  componentWillUnMount() {
+    // stop monitoring beacons:
+    Beacons
+      .stopMonitoringForRegion(region)
+      .then(() => console.log('Beacons monitoring stopped succesfully'))
+      .catch(error => console.log(`Beacons monitoring not stopped, error: ${error}`));
+    // stop ranging beacons:
+    Beacons
+      .stopRangingBeaconsInRegion(region)
+      .then(() => console.log('Beacons ranging stopped succesfully'))
+      .catch(error => console.log(`Beacons ranging not stopped, error: ${error}`));
+    // stop updating locationManager:
+    Beacons.stopUpdatingLocation();
+    // remove auth state event we registered at componentDidMount:
+    this.authStateDidRangeEvent.remove();
+    // remove monitoring events we registered at componentDidMount
+    this.regionDidEnterEvent.remove();
+    this.regionDidExitEvent.remove();
+    // remove ranging event we registered at componentDidMount
+    this.beaconsDidRangeEvent.remove();
+  }
 
   increment = () => {
     this.props.counterStateActions.increment();
