@@ -37,6 +37,8 @@
 	</dict>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need to use location for locate you (6)</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need to use location for locate you (6)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>We need to use location for locate you (6)</string>
 	<key>UIAppFonts</key>

@@ -1,15 +1,24 @@
 import {Platform} from 'react-native';
 import {TabNavigator, StackNavigator} from 'react-navigation';
 
-import CounterViewContainer from '../counter/CounterViewContainer';
+// import CounterViewContainer from '../counter/CounterViewContainer';
 import ColorViewContainer from '../colors/ColorViewContainer';
+import StoresContainer from '../stores/StoresContainer';
+import LoginContainer from '../login/LoginContainer';
+import FavoriteStoresContainer from '../favoritesStores/FavoritesStoresContainer';
+import StoresMapContainer from '../storesMap/StoresMapContainer';
 
 const headerColor = '#39babd';
 const activeColor = 'white';
 
+// import * as snapshot from '../../utils/snapshot';
+// snapshot.clearSnapshot();
+
 // TabNavigator is nested inside StackNavigator
 export const MainScreenNavigator = TabNavigator({
-  Counter: {screen: CounterViewContainer},
+  Stores: {screen: StoresContainer},
+  Favorites: {screen: FavoriteStoresContainer},
+  StoresMap: {screen: StoresMapContainer},
   Color: {screen: ColorViewContainer}
 }, {
   tabBarOptions: {
@@ -24,7 +33,7 @@ export const MainScreenNavigator = TabNavigator({
 });
 
 MainScreenNavigator.navigationOptions = {
-  title: 'Pepperoni App Template',
+  // title: 'Loyalty App',
   headerTitleStyle: {color: 'white'},
   headerStyle: {
     backgroundColor: headerColor,
@@ -35,6 +44,8 @@ MainScreenNavigator.navigationOptions = {
 // Root navigator is a StackNavigator
 const AppNavigator = StackNavigator({
   Home: {screen: MainScreenNavigator},
+  stores: {screen: StoresContainer},
+  Login: {screen: LoginContainer},
   InfiniteColorStack: {screen: ColorViewContainer}
 });
 

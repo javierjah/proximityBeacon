@@ -1,13 +1,15 @@
 import {Map, fromJS} from 'immutable';
 import {loop, combineReducers} from 'redux-loop-symbol-ponyfill';
 import NavigatorStateReducer from '../modules/navigator/NavigatorState';
-import CounterStateReducer from '../modules/counter/CounterState';
+// import CounterStateReducer from '../modules/counter/CounterState';
 import SessionStateReducer, {RESET_STATE} from '../modules/session/SessionState';
+import StoresStateReducer from '../modules/stores/StoresState';
+
 // ## Generator Reducer Imports
 
 const reducers = {
   // Counter sample app state. This can be removed in a live application
-  counter: CounterStateReducer,
+  stores: StoresStateReducer,
   // ## Generator Reducers
 
   // Navigator states
